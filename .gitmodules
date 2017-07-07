@@ -1,0 +1,6 @@
+[submodule "modules/yum"]
+	path = modules/yum
+	url = https://github.com/voxpupuli/puppet-yum
+[submodule "modules/stdlib"]
+	path = modules/stdlib
+	url = https://github.com/puppetlabs/puppetlabs-stdlib
