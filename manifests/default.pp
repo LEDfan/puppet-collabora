@@ -12,6 +12,7 @@ yumrepo { 'collabora_online':
 yum::install { 'loolwsd':
   ensure => present,
   source => '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm',
+  timeout =>  0
 }->
 package { 'CODE-brand':
   ensure => present
@@ -59,6 +60,7 @@ apache::listen { '443': }
 
 file { '/etc/httpd/certs':
   ensure  => directory,
+  recurse => true
 }->
 profile_openssl::self_signed_certificate { collabora:
   key_owner => "root",
