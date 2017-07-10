@@ -7,3 +7,9 @@
 [submodule "modules/openssl"]
 	path = modules/openssl
 	url = https://github.com/rlenglet/puppet-openssl
+[submodule "modules/apache"]
+	path = modules/apache
+	url = https://github.com/puppetlabs/puppetlabs-apache
+[submodule "modules/concat"]
+	path = modules/concat
+	url = https://github.com/puppetlabs/puppetlabs-concat

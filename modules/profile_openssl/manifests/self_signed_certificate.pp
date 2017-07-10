@@ -12,10 +12,7 @@ define profile_openssl::self_signed_certificate  (
   $cert_email_address=undef,
   $key_path=undef,
   $cert_path=undef) {
-
-  file { '/etc/ssl/private':
-    ensure => directory
-  } ->
+    
   openssl::self_signed_certificate { $title:
     key_bits => $key_bits,
     key_owner => $key_owner,

@@ -30,8 +30,6 @@ $response = $client->get($wopiDiscovery, ["verify" => false]);
 
 # add exception in firefox for the IP/url
 
-# change `/etc/loolwsd/loolwsd.xml` servername to name of Nextcloud instance
-
 # change the default apache config
 ```
   ProxyPass   /lool/adminws wss://127.0.0.1:9980/lool/adminws nocanon
