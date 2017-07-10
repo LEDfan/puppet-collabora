@@ -12,7 +12,7 @@ define profile_openssl::self_signed_certificate  (
   $cert_email_address=undef,
   $key_path=undef,
   $cert_path=undef) {
-    
+
   openssl::self_signed_certificate { $title:
     key_bits => $key_bits,
     key_owner => $key_owner,
@@ -33,7 +33,7 @@ define profile_openssl::self_signed_certificate  (
 
   if ($key_path) {
     file { $key_path:
-      require => openssl::self_signed_certificate[$title],
+      require => Openssl::Self_signed_certificate[$title],
       owner => $key_owner,
       group => $key_group,
       mode => $key_mode,
@@ -42,7 +42,7 @@ define profile_openssl::self_signed_certificate  (
   }
   if ($cert_path) {
     file { $cert_path:
-      require => openssl::self_signed_certificate[$title],
+      require => Openssl::Self_signed_certificate[$title],
       owner => root,
       group => root,
       mode => "0644",
