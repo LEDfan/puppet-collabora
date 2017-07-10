@@ -82,3 +82,7 @@ class {'collabora::admin_user':
   username => "admin",
   password => "admin"
 }
+
+class {'collabora::storage_backend':
+  type => "filesystem"
+}
