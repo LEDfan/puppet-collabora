@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :puppet do |puppet|
     puppet.module_path = "modules"
     puppet.manifests_path = "manifests"
-    puppet.options = ['--verbose']
+    puppet.options = ['--verbose --debug']
     puppet.manifest_file = "default.pp"
     puppet.hiera_config_path = "hiera.yaml"
   end
