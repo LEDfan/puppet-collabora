@@ -1,47 +1,8 @@
-# Installing Collabora online
+# Usage
 
-```
-# import the signing key
-wget https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7/repodata/repomd.xml.key && rpm --import repomd.xml.key
-# add the repository URL to yum
-yum-config-manager --add-repo https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7
-# perform the installation
-yum install loolwsd CODE-brand
-```
+1. Build a unlimited loolwsd rpm using https://github.com/ledfan/rpm-collabora and place the file at `modules/collabora/files/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm`. 
+2. Run `vagrant up`.
+3. Done
 
-# Generating certificates
-Needs to be done before `sudo systemctl start loolwsd` will work.
-```
-./vagrant/generate_ssl.sh
-```
-
-# Firewall
-For dev disable the firewall
-```
-sudo systemctl stop firewalld
-sudo systemctl disable firewalld
-```
-
-# Ignore cert errors in richdocuments app
-edit line 84 of apps/richdocuments/lib/WOPI/DiscoveryManager.php to:
-```
-$response = $client->get($wopiDiscovery, ["verify" => false]);
-```
-
-# add exception in firefox for the IP/url
-
-# change the default apache config
-```
-  ProxyPass   /lool/adminws wss://127.0.0.1:9980/lool/adminws nocanon
-```
-
-# add nextcloud to allowed hosts for WOPI
-Add at line 79 of `/etc/loolwsd/loolwsd.xml`
-```
-<host desc="Regex pattern of hostname to allow or deny." allow="true">pp-nc\.local</host>
-```
-
-# add nextcloud host to /etc/hosts
-
-
-And then everything will fail because loolwsd needs to connect to WOPI (the storage backend which is running on Nextcloud) but only wants to do it over ssl.
+# TODO
+ - [ ] cron

@@ -58,9 +58,8 @@ class { 'apache::mod::proxy_http': }
 class { 'apache::mod::proxy_wstunnel': }
 apache::listen { '443': }
 
-file { '/etc/httpd/certs':
+file { ['/etc/httpd', '/etc/httpd/certs']:
   ensure  => directory,
-  recurse => true
 }->
 profile_openssl::self_signed_certificate { collabora:
   key_owner => "root",
