@@ -4,5 +4,3 @@
 2. Run `vagrant up`.
 3. Done
 
-# TODO
- - [ ] cron
