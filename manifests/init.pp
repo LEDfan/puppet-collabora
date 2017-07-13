@@ -95,7 +95,7 @@ class collabora (
   }
 
   class {'collabora::storage_backend':
-    type => $storage_type
+    type => $storage_type,
     wopi_host => $wopi_host,
     webdav_host => $webdav_host
   }
