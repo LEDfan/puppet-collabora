@@ -1,19 +1,30 @@
-class collabora {
-  file { "/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm":
-    ensure => present,
-    source => ['puppet:///modules/collabora/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm']
-  }->
-  yumrepo { 'collabora_online':
-    descr => "Collabora online repo",
-    enabled => '1',
-    gpgcheck => '1',
-    gpgkey => 'https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7/repodata/repomd.xml.key',
-    baseurl => 'https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7/'
-  }->
-  yum::install { 'loolwsd':
-    ensure => present,
-    source => '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm',
-    timeout =>  0
+class collabora (
+  $manage_repos = true,
+  $storage_type = "filesystem",
+  $wopi_host    = undef,
+  $webdav_host  = undef
+  ){
+  if ($manage_repos) {
+    file { "/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm":
+      ensure => present,
+      source => ['puppet:///modules/collabora/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm'],
+    }->
+    yumrepo { 'collabora_online':
+      descr => "Collabora online repo",
+      enabled => '1',
+      gpgcheck => '1',
+      gpgkey => 'https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7/repodata/repomd.xml.key',
+      baseurl => 'https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos7/'
+    }->
+    yum::install { 'loolwsd':
+      ensure => present,
+      source => '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm',
+      timeout =>  0
+    }
+  } else {
+    package { 'loolwsd':
+      ensure => installed,
+    }
   }->
   package { 'CODE-brand':
     ensure => present
@@ -24,9 +35,9 @@ class collabora {
   profile_openssl::generate_ca { collabora:
     key_bits => 2048,
     cert_days => 365,
-    cert_country => BE,
-    cert_state => BE,
-    cert_organization => Foobar,
+    cert_country => "BE",
+    cert_state => "BE",
+    cert_organization => "Foobar",
     cert_common_names => ["collabora.local"],
     cert_email_address => "admin@collabora.local",
     key_path => '/etc/loolwsd/ca-private.key.pem',
@@ -64,8 +75,8 @@ class collabora {
     key_owner => "root",
     key_group => "root",
     key_mode => "0600",
-    cert_country => BE,
-    cert_state => BE,
+    cert_country => "BE",
+    cert_state => "BE",
     cert_common_names => ["collabora.local"],
     key_path => "/etc/httpd/certs/collabora.key",
     cert_path => "/etc/httpd/certs/collabora.cert",
@@ -84,6 +95,8 @@ class collabora {
   }
 
   class {'collabora::storage_backend':
-    type => "filesystem"
+    type => $storage_type
+    wopi_host => $wopi_host,
+    webdav_host => $webdav_host
   }
 }
