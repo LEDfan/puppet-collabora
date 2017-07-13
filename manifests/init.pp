@@ -1,8 +1,9 @@
 class collabora (
+  $servername,
   $manage_repos = true,
   $storage_backend = "filesystem",
   $wopi_host    = undef,
-  $webdav_host  = undef
+  $webdav_host  = undef,
   ){
   if ($manage_repos) {
     file { "/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm":
@@ -38,8 +39,8 @@ class collabora (
     cert_country => "BE",
     cert_state => "BE",
     cert_organization => "Foobar",
-    cert_common_names => ["collabora.local"],
-    cert_email_address => "admin@collabora.local",
+    cert_common_names => [$servername],
+    cert_email_address => "admin@$servername",
     key_path => '/etc/loolwsd/ca-private.key.pem',
     cert_path => '/etc/loolwsd/ca-chain.cert.pem'
   }->
@@ -77,7 +78,7 @@ class collabora (
     key_mode => "0600",
     cert_country => "BE",
     cert_state => "BE",
-    cert_common_names => ["collabora.local"],
+    cert_common_names => [$servername],
     key_path => "/etc/httpd/certs/collabora.key",
     cert_path => "/etc/httpd/certs/collabora.cert",
     notify  => Service['httpd'],
@@ -93,7 +94,7 @@ class collabora (
   }
 
   class {'collabora::vhost':
-    servername => 'collabora.local',
+    servername => $servername,
     certfile => '/etc/httpd/certs/collabora.cert',
     keyfile => '/etc/httpd/certs/collabora.key'
   }
