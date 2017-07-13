@@ -81,6 +81,15 @@ class collabora (
     key_path => "/etc/httpd/certs/collabora.key",
     cert_path => "/etc/httpd/certs/collabora.cert",
     notify  => Service['httpd'],
+  }->
+  class {'collabora::admin_user':
+    username => "admin",
+    password => "admin"
+  }->
+  class {'collabora::storage_backend':
+    type => $storage_backend,
+    wopi_host => $wopi_host,
+    webdav_host => $webdav_host
   }
 
   class {'collabora::vhost':
@@ -89,14 +98,4 @@ class collabora (
     keyfile => '/etc/httpd/certs/collabora.key'
   }
 
-  class {'collabora::admin_user':
-    username => "admin",
-    password => "admin"
-  }
-
-  class {'collabora::storage_backend':
-    type => $storage_backend,
-    wopi_host => $wopi_host,
-    webdav_host => $webdav_host
-  }
 }
