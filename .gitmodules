@@ -1,15 +1,15 @@
-[submodule "modules/yum"]
-	path = modules/yum
+[submodule "vagrant/modules/yum"]
+	path = vagrant/modules/yum
 	url = https://github.com/voxpupuli/puppet-yum
-[submodule "modules/stdlib"]
-	path = modules/stdlib
+[submodule "vagrant/modules/stdlib"]
+	path = vagrant/modules/stdlib
 	url = https://github.com/puppetlabs/puppetlabs-stdlib
-[submodule "modules/openssl"]
-	path = modules/openssl
+[submodule "vagrant/modules/openssl"]
+	path = vagrant/modules/openssl
 	url = https://github.com/ledfan/puppet-openssl
-[submodule "modules/apache"]
-	path = modules/apache
+[submodule "vagrant/modules/apache"]
+	path = vagrant/modules/apache
 	url = https://github.com/puppetlabs/puppetlabs-apache
-[submodule "modules/concat"]
-	path = modules/concat
+[submodule "vagrant/modules/concat"]
+	path = vagrant/modules/concat
 	url = https://github.com/puppetlabs/puppetlabs-concat
