@@ -1,6 +1,6 @@
 class collabora (
   $manage_repos = true,
-  $storage_type = "filesystem",
+  $storage_backend = "filesystem",
   $wopi_host    = undef,
   $webdav_host  = undef
   ){
@@ -95,7 +95,7 @@ class collabora (
   }
 
   class {'collabora::storage_backend':
-    type => $storage_type,
+    type => $storage_backend,
     wopi_host => $wopi_host,
     webdav_host => $webdav_host
   }
