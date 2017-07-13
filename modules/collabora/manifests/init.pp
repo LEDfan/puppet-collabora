@@ -18,8 +18,6 @@ class collabora {
   package { 'CODE-brand':
     ensure => present
   }->
-  class {'profile_openssl::setup':
-  }->
   file { '/etc/loolwsd':
     ensure => directory
   }->
