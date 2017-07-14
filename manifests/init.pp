@@ -23,11 +23,13 @@ class collabora (
       source  => '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm',
       timeout =>  0
     }
+    Yum::Install['loolwsd']->Package['CODE-brand']
   } else {
     package { 'loolwsd':
       ensure => installed,
     }
-  }->
+    Package['loolwsd']->Package['CODE-brand']
+  }
   package { 'CODE-brand':
     ensure => present
   }->
@@ -100,6 +102,9 @@ class collabora (
     keyfile    => '/etc/httpd/certs/collabora.key'
   }
 
+  package { 'iptables-services':
+    ensure  => installed,
+  }->
   firewall{'015 httpd':
     dport  => '443',
     action => 'accept',
