@@ -1,10 +1,13 @@
 # class collabora
 class collabora (
   $servername,
-  $manage_repos = true,
+  $manage_repos    = true,
   $storage_backend = 'filesystem',
-  $wopi_host    = undef,
-  $webdav_host  = undef,
+  $wopi_host       = undef,
+  $webdav_host     = undef,
+  $manage_ca       = true,
+  $ca_key_file     = undef,
+  $ca_cert_file    = undef
   ){
   if ($manage_repos) {
     file { '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm':
@@ -30,22 +33,41 @@ class collabora (
     }
     Package['loolwsd']->Package['CODE-brand']
   }
+
+  if ($manage_ca) {
+    profile_openssl::generate_ca { 'collabora':
+      key_bits           => 2048,
+      cert_days          => 365,
+      cert_country       => 'BE',
+      cert_state         => 'BE',
+      cert_organization  => 'Foobar',
+      cert_common_names  => [$servername],
+      cert_email_address => "admin@${servername}",
+      key_path           => '/etc/loolwsd/ca-private.key.pem',
+      cert_path          => '/etc/loolwsd/ca-chain.cert.pem'
+    }
+    Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['collabora']
+    Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['apache']
+  } else {
+    file { '/etc/loolwsd/ca-private.key.pem':
+      ensure => present,
+      source => [$ca_key_file]
+    }
+    file { '/etc/loolwsd/ca-chain.cert.pem':
+      ensure => present,
+      source => [$ca_cert_file]
+    }
+    File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['collabora']
+    File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['collabora']
+    File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['apache']
+    File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['apache']
+  }
+
   package { 'CODE-brand':
     ensure => present
   }->
   file { '/etc/loolwsd':
     ensure => directory
-  }->
-  profile_openssl::generate_ca { 'collabora':
-    key_bits           => 2048,
-    cert_days          => 365,
-    cert_country       => 'BE',
-    cert_state         => 'BE',
-    cert_organization  => 'Foobar',
-    cert_common_names  => [$servername],
-    cert_email_address => "admin@${servername}",
-    key_path           => '/etc/loolwsd/ca-private.key.pem',
-    cert_path          => '/etc/loolwsd/ca-chain.cert.pem'
   }->
   profile_openssl::generate_key_and_csr { 'collabora':
     key_path => '/etc/loolwsd/key.pem',
@@ -75,16 +97,18 @@ class collabora (
   file { ['/etc/httpd', '/etc/httpd/certs']:
     ensure  => directory,
   }->
-  profile_openssl::self_signed_certificate { 'collabora':
-    key_owner         => 'root',
-    key_group         => 'root',
-    key_mode          => '0600',
-    cert_country      => 'BE',
-    cert_state        => 'BE',
-    cert_common_names => [$servername],
-    key_path          => '/etc/httpd/certs/collabora.key',
-    cert_path         => '/etc/httpd/certs/collabora.cert',
-    notify            => Service['httpd'],
+  profile_openssl::generate_key_and_csr { 'apache':
+    common_name => $servername,
+    key_path => '/etc/httpd/certs/collabora.key.pem',
+    csr_path => '/etc/httpd/certs/collabora.csr.pem',
+  }->
+  profile_openssl::sign_cert_by_ca { 'apache':
+    cert_path    => '/etc/httpd/certs/collabora.cert.pem',
+    csr_path     => '/etc/httpd/certs/collabora.csr.pem',
+    ca_key_path  => '/etc/loolwsd/ca-private.key.pem',
+    ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
+    cert_days    => 365,
+    notify       => Service['httpd'],
   }->
   class {'collabora::admin_user':
     username => 'admin',
@@ -98,8 +122,8 @@ class collabora (
 
   class {'collabora::vhost':
     servername => $servername,
-    certfile   => '/etc/httpd/certs/collabora.cert',
-    keyfile    => '/etc/httpd/certs/collabora.key'
+    certfile   => '/etc/httpd/certs/collabora.cert.pem',
+    keyfile    => '/etc/httpd/certs/collabora.key.pem'
   }
 
   package { 'iptables-services':
