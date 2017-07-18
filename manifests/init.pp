@@ -126,8 +126,11 @@ class collabora (
     keyfile    => '/etc/httpd/certs/collabora.key.pem'
   }
 
-  class { 'firewall':
-  }->
+  if defined(Class['firewall']) {
+    class { 'firewall':
+    }
+    Class['firewall']->Firewall['015 httpd']
+  }
   firewall{'015 httpd':
     dport  => '443',
     action => 'accept',
