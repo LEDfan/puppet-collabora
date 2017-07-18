@@ -126,8 +126,7 @@ class collabora (
     keyfile    => '/etc/httpd/certs/collabora.key.pem'
   }
 
-  package { 'iptables-services':
-    ensure  => installed,
+  class { 'firewall':
   }->
   firewall{'015 httpd':
     dport  => '443',
