@@ -99,8 +99,9 @@ class collabora (
   }->
   profile_openssl::generate_key_and_csr { 'apache':
     common_name => $servername,
-    key_path => '/etc/httpd/certs/collabora.key.pem',
-    csr_path => '/etc/httpd/certs/collabora.csr.pem',
+    key_path    => '/etc/httpd/certs/collabora.key.pem',
+    csr_path    => '/etc/httpd/certs/collabora.csr.pem',
+    creates     => ['/etc/httpd/certs/collabora.key.pem', '/etc/httpd/certs/collabora.csr.pem']
   }->
   profile_openssl::sign_cert_by_ca { 'apache':
     cert_path    => '/etc/httpd/certs/collabora.cert.pem',
@@ -109,6 +110,7 @@ class collabora (
     ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
     cert_days    => 365,
     notify       => Service['httpd'],
+    creates      => ['/etc/httpd/certs/collabora.cert.pem']
   }->
   class {'collabora::admin_user':
     username => 'admin',
