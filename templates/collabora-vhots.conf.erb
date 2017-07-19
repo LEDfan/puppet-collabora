@@ -40,4 +40,9 @@
   # Download as, Fullscreen presentation and Image upload operations
   ProxyPass           /lool https://127.0.0.1:9980/lool
   ProxyPassReverse    /lool https://127.0.0.1:9980/lool
+
+  # This is not included in the offical LOOL/collabora docs
+  # but this can be useful as status page
+  ProxyPass           / https://127.0.0.1:9980/
+  ProxyPassReverse    / https://127.0.0.1:9980/
 </VirtualHost>
