@@ -129,9 +129,9 @@ class collabora (
   if !defined(Class['firewall']) {
     class { 'firewall':
     }
-    Class['firewall']->Firewall['015 httpd']
+    Class['firewall']->Firewall['collabora-firewal-443-port']
   }
-  firewall{'015 httpd':
+  firewall { 'collabora-firewal-443-port':
     dport  => '443',
     action => 'accept',
   }
