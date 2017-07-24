@@ -1,7 +1,7 @@
 # class collabora
 class collabora (
   $servername,
-  $admin_uername,
+  $admin_username,
   $admin_password,
   $manage_repos    = true,
   $storage_backend = 'filesystem',
