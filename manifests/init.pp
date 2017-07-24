@@ -1,13 +1,15 @@
 # class collabora
 class collabora (
   $servername,
+  $admin_uername,
+  $admin_password,
   $manage_repos    = true,
   $storage_backend = 'filesystem',
   $wopi_host       = undef,
   $webdav_host     = undef,
   $manage_ca       = true,
   $ca_key_file     = undef,
-  $ca_cert_file    = undef
+  $ca_cert_file    = undef,
   ){
   if ($manage_repos) {
     file { '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm':
@@ -111,8 +113,8 @@ class collabora (
     notify       => Service['httpd'],
   }->
   class {'collabora::admin_user':
-    username => 'admin',
-    password => 'admin'
+    username => $admin_username,
+    password => $admin_password
   }->
   class {'collabora::storage_backend':
     type        => $storage_backend,
