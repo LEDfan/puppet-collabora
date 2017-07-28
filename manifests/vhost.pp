@@ -1,7 +1,8 @@
 class collabora::vhost (
   $servername,
   $certfile,
-  $keyfile) {
+  $keyfile,
+  $serveraliases = []) {
   file { '/etc/httpd/conf.d/collabora_80.conf':
     path    => '/etc/httpd/conf.d/collabora_80.conf',
     ensure  => file,

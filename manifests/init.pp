@@ -10,6 +10,7 @@ class collabora (
   $manage_ca       = true,
   $ca_key_file     = undef,
   $ca_cert_file    = undef,
+  $serveraliases   = [],
   ){
   if ($manage_repos) {
     file { '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm':
@@ -123,9 +124,10 @@ class collabora (
   }
 
   class {'collabora::vhost':
-    servername => $servername,
-    certfile   => '/etc/httpd/certs/collabora.cert.pem',
-    keyfile    => '/etc/httpd/certs/collabora.key.pem'
+    servername    => $servername,
+    certfile      => '/etc/httpd/certs/collabora.cert.pem',
+    keyfile       => '/etc/httpd/certs/collabora.key.pem',
+    serveraliases => $serveraliases,
   }
 
   if !defined(Class['firewall']) {
