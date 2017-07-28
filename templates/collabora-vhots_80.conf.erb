@@ -1,7 +1,8 @@
 <VirtualHost *:80>
   ServerName  <%= @servername %>
-  <% serveraliases.each do |serveralias| -%>
-    ServerAlias <%= serveralias %>
+  
+  <% @serveraliases.each do |serveralias| -%>
+  ServerAlias <%= serveralias %>
   <% end -%>
 
   # Encoded slashes need to be allowed

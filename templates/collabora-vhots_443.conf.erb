@@ -1,6 +1,10 @@
 <VirtualHost *:443>
   ServerName  <%= @servername %>
 
+  <% @serveraliases.each do |serveralias| -%>
+  ServerAlias <%= serveralias %>
+  <% end -%>
+
   # SSL configuration, you may want to take the easy route instead and use Lets Encrypt!
   SSLEngine on
   SSLCertificateFile  <%= @certfile %>
