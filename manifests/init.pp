@@ -11,7 +11,7 @@ class collabora (
   $ca_key_file     = undef,
   $ca_cert_file    = undef,
   $serveraliases   = [],
-  ){
+  $manage_vhost    = true){
   if ($manage_repos) {
     file { '/tmp/unlimited-loolwsd-2.1.2-6.el7.centos.x86_64.rpm':
       ensure => present,
@@ -57,7 +57,7 @@ class collabora (
       content => $ca_key_file
     }
     file { '/etc/loolwsd/ca-chain.cert.pem':
-      ensure => present,
+      ensure  => present,
       content => $ca_cert_file
     }
     File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['collabora']
@@ -123,11 +123,13 @@ class collabora (
     webdav_host => $webdav_host
   }
 
-  class {'collabora::vhost':
-    servername    => $servername,
-    certfile      => '/etc/httpd/certs/collabora.cert.pem',
-    keyfile       => '/etc/httpd/certs/collabora.key.pem',
-    serveraliases => $serveraliases,
+  if ($manage_vhost) {
+    class {'collabora::vhost':
+      servername    => $servername,
+      certfile      => '/etc/httpd/certs/collabora.cert.pem',
+      keyfile       => '/etc/httpd/certs/collabora.key.pem',
+      serveraliases => $serveraliases,
+    }
   }
 
   if !defined(Class['firewall']) {
