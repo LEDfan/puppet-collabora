@@ -53,12 +53,12 @@ class collabora (
     Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['apache']
   } else {
     file { '/etc/loolwsd/ca-private.key.pem':
-      ensure => present,
-      source => [$ca_key_file]
+      ensure  => present,
+      content => $ca_key_file
     }
     file { '/etc/loolwsd/ca-chain.cert.pem':
       ensure => present,
-      source => [$ca_cert_file]
+      content => $ca_cert_file
     }
     File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['collabora']
     File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['collabora']
