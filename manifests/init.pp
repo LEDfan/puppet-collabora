@@ -90,12 +90,12 @@ class collabora (
     enable => true
   }
 
-  class { 'apache': }
-  class { 'apache::mod::ssl': }
-  class { 'apache::mod::proxy': }
-  class { 'apache::mod::proxy_http': }
-  class { 'apache::mod::proxy_wstunnel': }
-  apache::listen { '443': }
+  include ::apache
+  include ::apache::mod::ssl
+  include ::apache::mod::proxy
+  include ::apache::mod::proxy_http
+  include ::apache::mod::proxy_wstunnel
+  ::apache::listen { '443': }
 
   file { ['/etc/httpd', '/etc/httpd/certs']:
     ensure  => directory,
