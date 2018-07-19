@@ -4,6 +4,7 @@ class collabora (
   $admin_username,
   $admin_password,
   $manage_repos    = true,
+  $setup_ssl       = true,
   $storage_backend = 'filesystem',
   $wopi_host       = undef,
   $webdav_host     = undef,
@@ -37,33 +38,87 @@ class collabora (
     Package['loolwsd']->Package['CODE-brand']
   }
 
-  if ($manage_ca) {
-    profile_openssl::generate_ca { 'collabora':
-      key_bits           => 2048,
-      cert_days          => 365,
-      cert_country       => 'BE',
-      cert_state         => 'BE',
-      cert_organization  => 'Foobar',
-      cert_common_names  => [$servername],
-      cert_email_address => "admin@${servername}",
-      key_path           => '/etc/loolwsd/ca-private.key.pem',
-      cert_path          => '/etc/loolwsd/ca-chain.cert.pem'
+  if ($setup_ssl) {
+    if ($manage_ca) {
+      profile_openssl::generate_ca { 'collabora':
+        key_bits           => 2048,
+        cert_days          => 365,
+        cert_country       => 'BE',
+        cert_state         => 'BE',
+        cert_organization  => 'Foobar',
+        cert_common_names  => [$servername],
+        cert_email_address => "admin@${servername}",
+        key_path           => '/etc/loolwsd/ca-private.key.pem',
+        cert_path          => '/etc/loolwsd/ca-chain.cert.pem'
+      }
+      Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['collabora']
+      Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['apache']
+    } else {
+      file { '/etc/loolwsd/ca-private.key.pem':
+        ensure  => present,
+        content => $ca_key_file
+      }
+      file { '/etc/loolwsd/ca-chain.cert.pem':
+        ensure  => present,
+        content => $ca_cert_file
+      }
+      File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['collabora']
+      File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['collabora']
+      File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['apache']
+      File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['apache']
     }
-    Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['collabora']
-    Profile_openssl::Generate_ca['collabora']->Profile_openssl::Generate_key_and_csr['apache']
+
+    profile_openssl::generate_key_and_csr { 'collabora':
+      key_path => '/etc/loolwsd/key.pem',
+      csr_path => '/etc/loolwsd/csr.pem',
+      require  => File['/etc/loolwsd']
+    }->
+    profile_openssl::sign_cert_by_ca { 'collabora':
+      cert_path    => '/etc/loolwsd/cert.pem',
+      csr_path     => '/etc/loolwsd/csr.pem',
+      ca_key_path  => '/etc/loolwsd/ca-private.key.pem',
+      ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
+      cert_days    => 365
+    }
+
+    profile_openssl::generate_key_and_csr { 'apache':
+      common_name => $servername,
+      key_path    => '/etc/httpd/certs/collabora.key.pem',
+      csr_path    => '/etc/httpd/certs/collabora.csr.pem',
+      require     => File['/etc/httpd']
+    }->
+    profile_openssl::sign_cert_by_ca { 'apache':
+      cert_path    => '/etc/httpd/certs/collabora.cert.pem',
+      csr_path     => '/etc/httpd/certs/collabora.csr.pem',
+      ca_key_path  => '/etc/loolwsd/ca-private.key.pem',
+      ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
+      cert_days    => 365,
+      notify       => Service['httpd'],
+      before       => Clas['collabora::admin_user']
+    }
+
+    include ::apache::mod::ssl
+    ::apache::listen { '443': }
+
+    if !defined(Class['firewall']) {
+      class { 'firewall':
+      }
+      Class['firewall']->Firewall['21 - collabora-firewal-443-port']
+    }
+    firewall { '21 - collabora-firewal-443-port':
+      dport  => '443',
+      action => 'accept',
+    }
   } else {
-    file { '/etc/loolwsd/ca-private.key.pem':
-      ensure  => present,
-      content => $ca_key_file
-    }
-    file { '/etc/loolwsd/ca-chain.cert.pem':
-      ensure  => present,
-      content => $ca_cert_file
-    }
-    File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['collabora']
-    File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['collabora']
-    File['/etc/loolwsd/ca-chain.cert.pem']->Profile_openssl::Generate_key_and_csr['apache']
-    File['/etc/loolwsd/ca-private.key.pem']->Profile_openssl::Generate_key_and_csr['apache']
+    augeas{ 'collabora_disable_ssl':
+      incl    => '/etc/loolwsd/loolwsd.xml',
+      lens    => 'Xml.lns',
+      context => 'files/etc/loolwsd/loolwsd.xml/config',
+      changes => [
+        'set ssl/enable/#text false',
+      ],
+      notify  => Service['loolwsd']
+     }
   }
 
   package { 'CODE-brand':
@@ -71,17 +126,6 @@ class collabora (
   }->
   file { '/etc/loolwsd':
     ensure => directory
-  }->
-  profile_openssl::generate_key_and_csr { 'collabora':
-    key_path => '/etc/loolwsd/key.pem',
-    csr_path => '/etc/loolwsd/csr.pem'
-  }->
-  profile_openssl::sign_cert_by_ca { 'collabora':
-    cert_path    => '/etc/loolwsd/cert.pem',
-    csr_path     => '/etc/loolwsd/csr.pem',
-    ca_key_path  => '/etc/loolwsd/ca-private.key.pem',
-    ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
-    cert_days    => 365
   }
 
   service { 'loolwsd':
@@ -91,27 +135,12 @@ class collabora (
   }
 
   include ::apache
-  include ::apache::mod::ssl
   include ::apache::mod::proxy
   include ::apache::mod::proxy_http
   include ::apache::mod::proxy_wstunnel
-  ::apache::listen { '443': }
 
   file { ['/etc/httpd', '/etc/httpd/certs']:
     ensure  => directory,
-  }->
-  profile_openssl::generate_key_and_csr { 'apache':
-    common_name => $servername,
-    key_path    => '/etc/httpd/certs/collabora.key.pem',
-    csr_path    => '/etc/httpd/certs/collabora.csr.pem',
-  }->
-  profile_openssl::sign_cert_by_ca { 'apache':
-    cert_path    => '/etc/httpd/certs/collabora.cert.pem',
-    csr_path     => '/etc/httpd/certs/collabora.csr.pem',
-    ca_key_path  => '/etc/loolwsd/ca-private.key.pem',
-    ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
-    cert_days    => 365,
-    notify       => Service['httpd'],
   }->
   class {'collabora::admin_user':
     username => $admin_username,
@@ -129,17 +158,8 @@ class collabora (
       certfile      => '/etc/httpd/certs/collabora.cert.pem',
       keyfile       => '/etc/httpd/certs/collabora.key.pem',
       serveraliases => $serveraliases,
+      setup_ssl     => $setup_ssl,
     }
-  }
-
-  if !defined(Class['firewall']) {
-    class { 'firewall':
-    }
-    Class['firewall']->Firewall['21 - collabora-firewal-443-port']
-  }
-  firewall { '21 - collabora-firewal-443-port':
-    dport  => '443',
-    action => 'accept',
   }
 
 }

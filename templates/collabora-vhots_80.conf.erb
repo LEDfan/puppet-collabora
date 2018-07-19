@@ -1,6 +1,6 @@
 <VirtualHost *:80>
   ServerName  <%= @servername %>
-  
+
   <% @serveraliases.each do |serveralias| -%>
   ServerAlias <%= serveralias %>
   <% end -%>
@@ -8,36 +8,30 @@
   # Encoded slashes need to be allowed
   AllowEncodedSlashes NoDecode
 
-  # Container uses a unique non-signed certificate
-  SSLProxyEngine On
-  SSLProxyVerify None
-  SSLProxyCheckPeerCN Off
-  SSLProxyCheckPeerName Off
-
   # keep the host
   ProxyPreserveHost On
 
   # static html, js, images, etc. served from loolwsd
   # loleaflet is the client part of LibreOffice Online
-  ProxyPass           /loleaflet https://127.0.0.1:9980/loleaflet retry=0
-  ProxyPassReverse    /loleaflet https://127.0.0.1:9980/loleaflet
+  ProxyPass           /loleaflet http://127.0.0.1:9980/loleaflet retry=0
+  ProxyPassReverse    /loleaflet http://127.0.0.1:9980/loleaflet
 
   # WOPI discovery URL
-  ProxyPass           /hosting/discovery https://127.0.0.1:9980/hosting/discovery retry=0
-  ProxyPassReverse    /hosting/discovery https://127.0.0.1:9980/hosting/discovery
+  ProxyPass           /hosting/discovery http://127.0.0.1:9980/hosting/discovery retry=0
+  ProxyPassReverse    /hosting/discovery http://127.0.0.1:9980/hosting/discovery
 
   # Main websocket
-  ProxyPassMatch "/lool/(.*)/ws$" wss://127.0.0.1:9980/lool/$1/ws nocanon
+  ProxyPassMatch "/lool/(.*)/ws$" ws://127.0.0.1:9980/lool/$1/ws nocanon
 
   # Admin Console websocket
-  ProxyPass   /lool/adminws wss://127.0.0.1:9980/lool/adminws nocanon
+  ProxyPass   /lool/adminws ws://127.0.0.1:9980/lool/adminws nocanon
 
   # Download as, Fullscreen presentation and Image upload operations
-  ProxyPass           /lool https://127.0.0.1:9980/lool
-  ProxyPassReverse    /lool https://127.0.0.1:9980/lool
+  ProxyPass           /lool http://127.0.0.1:9980/lool
+  ProxyPassReverse    /lool http://127.0.0.1:9980/lool
 
   # This is not included in the offical LOOL/collabora docs
   # but this can be useful as status page
-  ProxyPass           / https://127.0.0.1:9980/
-  ProxyPassReverse    / https://127.0.0.1:9980/
+  ProxyPass           / http://127.0.0.1:9980/
+  ProxyPassReverse    / http://127.0.0.1:9980/
 </VirtualHost>
