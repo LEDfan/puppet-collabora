@@ -119,6 +119,15 @@ class collabora (
       ],
       notify  => Service['loolwsd']
      }
+    augeas{ 'collabora_enable_termination':
+      incl    => '/etc/loolwsd/loolwsd.xml',
+      lens    => 'Xml.lns',
+      context => 'files/etc/loolwsd/loolwsd.xml/config',
+      changes => [
+        'set ssl/termination/#text true',
+      ],
+      notify  => Service['loolwsd']
+     }
   }
 
   package { 'CODE-brand':
