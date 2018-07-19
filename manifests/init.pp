@@ -94,7 +94,7 @@ class collabora (
       ca_cert_path => '/etc/loolwsd/ca-chain.cert.pem',
       cert_days    => 365,
       notify       => Service['httpd'],
-      before       => Clas['collabora::admin_user']
+      before       => Class['collabora::admin_user']
     }
 
     include ::apache::mod::ssl
